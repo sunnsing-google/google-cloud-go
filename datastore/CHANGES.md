@@ -1,5 +1,12 @@
 # Changes
 
+## [1.13.1](https://github.com/googleapis/google-cloud-go/compare/datastore/v1.13.0...datastore/v1.13.1) (2023-08-04)
+
+
+### Documentation
+
+* **datastore/admin:** Specify limit for `properties` in `Index` message in Datastore Admin API ([b890425](https://github.com/googleapis/google-cloud-go/commit/b8904253a0f8424ea4548469e5feef321bd7396a))
+
 ## [1.13.0](https://github.com/googleapis/google-cloud-go/compare/datastore/v1.12.1...datastore/v1.13.0) (2023-07-26)
 
 
