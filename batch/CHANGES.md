@@ -1,6 +1,13 @@
 # Changelog
 
 
+## [1.4.0](https://github.com/googleapis/google-cloud-go/compare/batch/v1.3.1...batch/v1.4.0) (2023-08-04)
+
+
+### Features
+
+* **batch:** Add comment to the unsupported order_by field of ListTasksRequest ([e3f8c89](https://github.com/googleapis/google-cloud-go/commit/e3f8c89429a207c05fee36d5d93efe76f9e29efe))
+
 ## [1.3.1](https://github.com/googleapis/google-cloud-go/compare/batch/v1.3.0...batch/v1.3.1) (2023-07-10)
 
 
