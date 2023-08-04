@@ -2,6 +2,19 @@
 
 
 
+## [1.54.0](https://github.com/googleapis/google-cloud-go/compare/bigquery/v1.53.0...bigquery/v1.54.0) (2023-08-04)
+
+
+### Features
+
+* **bigquery/datatransfer:** Add EncryptionConfiguration to TransferConfig ([e3f8c89](https://github.com/googleapis/google-cloud-go/commit/e3f8c89429a207c05fee36d5d93efe76f9e29efe))
+* **bigquery/storage/managedwriter:** Refine connection metrics ([#8324](https://github.com/googleapis/google-cloud-go/issues/8324)) ([54fcf36](https://github.com/googleapis/google-cloud-go/commit/54fcf36fe7e26d6e3d11deec19f56e92ceb87d34))
+
+
+### Bug Fixes
+
+* **bigquery:** Use JobFromProject for storage iterator ([#8372](https://github.com/googleapis/google-cloud-go/issues/8372)) ([bfbf18c](https://github.com/googleapis/google-cloud-go/commit/bfbf18cb373cd6a88a22eec8db7033f6678df755))
+
 ## [1.53.0](https://github.com/googleapis/google-cloud-go/compare/bigquery/v1.52.0...bigquery/v1.53.0) (2023-07-24)
 
 
