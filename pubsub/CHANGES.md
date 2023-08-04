@@ -1,5 +1,12 @@
 # Changes
 
+## [1.33.1](https://github.com/googleapis/google-cloud-go/compare/pubsub/v1.33.0...pubsub/v1.33.1) (2023-08-04)
+
+
+### Documentation
+
+* **pubsub:** Clarified where ordering_key will be written if write_metadata is set ([327e101](https://github.com/googleapis/google-cloud-go/commit/327e10188a2e22dd7b7e6c12a8cf66729f65974c))
+
 ## [1.33.0](https://github.com/googleapis/google-cloud-go/compare/pubsub/v1.32.0...pubsub/v1.33.0) (2023-07-24)
 
 
