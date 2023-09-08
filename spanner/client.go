@@ -664,6 +664,42 @@ func (c *Client) Apply(ctx context.Context, ms []*Mutation, opts ...ApplyOption)
 	return t.applyAtLeastOnce(ctx, ms...)
 }
 
+// BatchWrite
+func (c *Client) BatchWrite(ctx context.Context, mgs []*MutationGroup, opts ...ApplyOption) (stream sppb.Spanner_BatchWriteClient, err error) {
+	ao := &applyOption{}
+
+	for _, opt := range c.ao {
+		opt(ao)
+	}
+
+	for _, opt := range opts {
+		opt(ao)
+	}
+
+	ctx = trace.StartSpan(ctx, "cloud.google.com/go/spanner.BatchWrite")
+	defer func() { trace.EndSpan(ctx, err) }()
+
+	mgsPb, err := mutationGroupsProto(mgs)
+	if err != nil {
+		return nil, err
+	}
+	var sh *sessionHandle
+	defer func() {
+		if sh != nil {
+			sh.recycle()
+		}
+	}()
+	sh, err = c.idleSessions.take(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return sh.getClient().BatchWrite(contextWithOutgoingMetadata(ctx, sh.getMetadata(), c.disableRouteToLeader), &sppb.BatchWriteRequest{
+		Session:        sh.getID(),
+		MutationGroups: mgsPb,
+		RequestOptions: createRequestOptions(sppb.RequestOptions_PRIORITY_UNSPECIFIED, "", ao.transactionTag),
+	})
+}
+
 // logf logs the given message to the given logger, or the standard logger if
 // the given logger is nil.
 func logf(logger *log.Logger, format string, v ...interface{}) {
