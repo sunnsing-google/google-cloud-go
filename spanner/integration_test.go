@@ -22,6 +22,7 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"io"
 	"log"
 	"math"
 	"math/big"
@@ -821,6 +822,75 @@ func TestIntegration_SingleUse_WithQueryOptions(t *testing.T) {
 			w.row)
 		if writes[i].ts, err = client.Apply(ctx, []*Mutation{m}, ApplyAtLeastOnce()); err != nil {
 			t.Fatal(err)
+		}
+	}
+	singersQuery := "SELECT SingerId, FirstName, LastName FROM Singers WHERE SingerId IN (@p1, @p2, @p3)"
+	if testDialect == adminpb.DatabaseDialect_POSTGRESQL {
+		singersQuery = "SELECT SingerId, FirstName, LastName FROM Singers WHERE SingerId = $1 OR  SingerId = $2 OR  SingerId = $3"
+	}
+	qo := QueryOptions{Options: &sppb.ExecuteSqlRequest_QueryOptions{
+		OptimizerVersion:           "1",
+		OptimizerStatisticsPackage: "latest",
+	}}
+	got, err := readAll(client.Single().QueryWithOptions(ctx, Statement{
+		singersQuery,
+		map[string]interface{}{"p1": int64(1), "p2": int64(3), "p3": int64(4)},
+	}, qo))
+
+	if err != nil {
+		t.Errorf("ReadOnlyTransaction.QueryWithOptions returns error %v, want nil", err)
+	}
+
+	want := [][]interface{}{{int64(1), "Marc", "Foo"}, {int64(3), "Alpha", "Beta"}, {int64(4), "Last", "End"}}
+	if !testEqual(got, want) {
+		t.Errorf("got unexpected result from ReadOnlyTransaction.QueryWithOptions: %v, want %v", got, want)
+	}
+}
+
+func TestIntegration_BatchWrite(t *testing.T) {
+	skipEmulatorTest(t)
+	t.Parallel()
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
+	defer cancel()
+	// Set up testing environment.
+	client, _, cleanup := prepareIntegrationTest(ctx, t, DefaultSessionPoolConfig, statements[testDialect][singerDDLStatements])
+	defer cleanup()
+	// fmt.Println(client.DatabaseName())
+
+	writes := []struct {
+		row []interface{}
+		ts  time.Time
+	}{
+		{row: []interface{}{1, "Marc", "Foo"}},
+		{row: []interface{}{2, "Tars", "Bar"}},
+		{row: []interface{}{3, "Alpha", "Beta"}},
+		{row: []interface{}{4, "Last", "End"}},
+	}
+	mgs := make([]*MutationGroup, len(writes))
+	// Try to write four rows through the BatchWrite API.
+	for i, w := range writes {
+		// var err error
+		m := InsertOrUpdate("Singers",
+			[]string{"SingerId", "FirstName", "LastName"},
+			w.row)
+		ms := make([]*Mutation, 1)
+		ms[0] = m
+		mgs[i] = &MutationGroup{mutations: ms}
+	}
+	if resp, err := client.BatchWrite(ctx, mgs, TransactionTag("batch-write")); err != nil {
+		t.Fatal(err)
+	} else {
+		for {
+			r, err := resp.Recv()
+			if err != nil {
+				if err != io.EOF {
+					t.Fatal(err)
+				}
+				break
+			} else {
+				fmt.Println(r)
+			}
 		}
 	}
 	singersQuery := "SELECT SingerId, FirstName, LastName FROM Singers WHERE SingerId IN (@p1, @p2, @p3)"
